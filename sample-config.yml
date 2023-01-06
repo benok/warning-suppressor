@@ -2,3 +2,8 @@ filter-config:
   suppress:
     - "LINN32:" # Warning: LINN32: Last line 3868 (F1Ch) is less than or equal to first line 3868 (F1Ch) for symbol "chparse()" in module xxx.cpp
     - "Warning: public.*clashes with prior module" # [TLIB Warning] Warning: public 'glui_img_checkbox_0' in module '..\_obj\rs100\x64\Debug\glui\glui_img_checkbox_0.o' clashes with prior module 'glui_bitmap_img_data.o'
+  colorize:
+    - "Turbo Incremental Link": "cyan"
+    - "(Fatal|Error)": "red"
+    - "Warning": "yellow"
+

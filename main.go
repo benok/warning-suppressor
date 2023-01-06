@@ -21,13 +21,25 @@ func filterOutput(scanner *bufio.Scanner, c color.Attribute) {
 		fmt.Fprintf(os.Stderr, "warning-suppressor: failed to get regexp(%s).\n", err)
 		os.Exit(1)
 	}
+	r2cs := filterConfig.RegExToColors()
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		if r_sup.MatchString(line) {
 			continue
 		}
-		if false {
-			colorize := color.New(c).SprintFunc()
+
+		var colorize func(a ...interface{}) string
+		for _, r2c := range r2cs {
+			if r2c.Regex.MatchString(line) {
+				colorize = color.New(r2c.Color).SprintFunc()
+				break
+			} else {
+				colorize = nil
+			}
+		}
+
+		if colorize != nil {
 			fmt.Println(colorize(line))
 		} else {
 			fmt.Println(line)
