@@ -7,8 +7,10 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"syscall"
 
 	"github.com/fatih/color"
+	"golang.org/x/sys/windows"
 )
 
 // https://stackoverflow.com/questions/27576902/reading-stdout-from-a-subprocess
@@ -31,13 +33,24 @@ func fileNameWithoutExt(fn string) string {
 	return fn[:len(fn)-len(filepath.Ext(fn))]
 }
 
+func getOrigCommandLine() string {
+	// https://github.com/golang/go/blob/f86f9a3038eb6db513a0ea36bc2af7a13b005e99/src/os/exec_windows.go#L96
+	return windows.UTF16PtrToString(syscall.GetCommandLine())
+}
+
 func main() {
 	args := os.Args
 	myCmd := args[0]
 	// make full path of _orig command (abc.exe -> abc_orig.exe)
 	origCmd := filepath.Join(fileNameWithoutExt(myCmd) + "_orig" + filepath.Ext(myCmd))
 
-	cmd := exec.Command(origCmd, args[1:]...)
+	// execute abc_orig.exe
+	cmd := exec.Command(origCmd /*,args[1:]...*/)
+
+	// passing original command line is required for some tools
+	// (see https://qiita.com/zetamatta/items/75ee1226f73113961f59,
+	//	https://github.com/golang/go/blob/ea4631cc0cf301c824bd665a7980c13289ab5c9d/src/os/exec/exec.go#L373)
+	cmd.SysProcAttr = &syscall.SysProcAttr{CmdLine: getOrigCommandLine()} // args[0] is not replaced, but it's OK.(not used)
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
