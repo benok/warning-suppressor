@@ -4,9 +4,9 @@ A wrapper to suppress unneeded output (e.g. spurious warning) without modifying 
 (Currently, only Windows environment is supported.)
 
 ## How to use
-1. Rename original executable from ExeName.exe to  ExeName_orig.exe.
-2. Copy warning-suppressor.exe as ExeName.exe
-3. Create ExeName.exe.yml and configure
+1. Rename original executable from (ExeName).exe to  (ExeName)_orig.exe.
+2. Copy warning-suppressor.exe as (ExeName).exe
+3. Create (ExeName).exe.yml and configure
 
 ## Features
 
@@ -33,5 +33,5 @@ filter-config:
     - "Warning": "yellow"
 ```
 
-
-
+## Links 
+ * [github repo](https://github.com/benok/warning-suppressor)
