@@ -21,8 +21,12 @@ func filterOutput(scanner *bufio.Scanner, c color.Attribute) {
 		if strings.Contains(line, "LINN32:") {
 			continue
 		}
-		colorize := color.New(c).SprintFunc()
-		fmt.Println(colorize(line))
+		if false {
+			colorize := color.New(c).SprintFunc()
+			fmt.Println(colorize(line))
+		} else {
+			fmt.Println(line)
+		}
 	}
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintf(os.Stderr, "warning-suppressor: scan failed(%s).\n", err)
