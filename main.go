@@ -6,19 +6,24 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"syscall"
 
 	"github.com/fatih/color"
 	"golang.org/x/sys/windows"
 )
 
+var filterConfig FilterConfig
+
 // https://stackoverflow.com/questions/27576902/reading-stdout-from-a-subprocess
 func filterOutput(scanner *bufio.Scanner, c color.Attribute) {
+	r_sup, err := filterConfig.SuppressRegExp()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "warning-suppressor: failed to get regexp(%s).\n", err)
+		os.Exit(1)
+	}
 	for scanner.Scan() {
 		line := scanner.Text()
-		// TODO: read config file
-		if strings.Contains(line, "LINN32:") {
+		if r_sup.MatchString(line) {
 			continue
 		}
 		if false {
@@ -30,6 +35,7 @@ func filterOutput(scanner *bufio.Scanner, c color.Attribute) {
 	}
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintf(os.Stderr, "warning-suppressor: scan failed(%s).\n", err)
+		os.Exit(1)
 	}
 }
 
@@ -45,8 +51,16 @@ func getOrigCommandLine() string {
 func main() {
 	args := os.Args
 	myCmd := args[0]
+	myCmdConfig := myCmd + ".yml"
 	// make full path of _orig command (abc.exe -> abc_orig.exe)
 	origCmd := filepath.Join(fileNameWithoutExt(myCmd) + "_orig" + filepath.Ext(myCmd))
+
+	err := filterConfig.Load(myCmdConfig)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "warning-suppressor: %s\n", err.Error())
+		os.Exit(1)
+	}
+	//fmt.Fprintf(os.Stderr, "config: %s\n", filterConfig)
 
 	// execute abc_orig.exe
 	cmd := exec.Command(origCmd /*,args[1:]...*/)
